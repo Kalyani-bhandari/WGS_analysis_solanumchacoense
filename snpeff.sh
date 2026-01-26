@@ -34,8 +34,13 @@ tabix -p vcf Resistance.annotated.vcf.gz
 
 bcftools view -i 'INFO/ANN ~ "HIGH"' Resistance.annotated.vcf.gz \
     -Oz -o Resistance.HIGH.vcf.gz
+	 bcftools index Resistant.HIGH.vcf.gz
+	 gunzip -c Resistance.HIGH.vcf.gz > Resistance.HIGH.vcf
+	 
     bcftools view -i 'INFO/ANN ~ "HIGH|MODERATE"' Resistance.annotated.vcf.gz \
   -Oz -o Resistance.HIGH.vcf.gz
+ bcftools index Resistant.HIGH.vcf.gz
+  
 
 zcat Resistance.HIGH.vcf.gz | head
 zgrep -v "^#" Resistance.HIGH.vcf.gz | head
@@ -48,13 +53,7 @@ bcftools index Resistance.MODERATE.vcf.gz
 bcftools view -H Resistance.MODERATE.vcf.gz | wc -l
 zgrep -v "^#" Resistance.MODERATE.vcf.gz | head
 
-
-
-bcftools view -i 'INFO/ANN ~ "HIGH"' Susceptible.annotated.vcf.gz \
-    -Oz -o Susceptible.HIGH.vcf.gz
-
-
-    #Extracted_geneID_from_moderate_variants
+#Extracted_geneID_from_moderate_variants
     zgrep -v "^#" Resistance.MODERATE.vcf.gz \
     | sed 's/.*ANN=//' \
     | tr ',' '\n' \
@@ -64,7 +63,8 @@ bcftools view -i 'INFO/ANN ~ "HIGH"' Susceptible.annotated.vcf.gz \
     > Resistance_MODERATE_genes.txt
 
     sed -i 's/$/.t1/' Resistance_MODERATE_genes.txt
-#alined with functional annotation
+	
+#alined_with_functional_annotation
 sort Resistance_MODERATE_genes.txt > Resistance_MODERATE_genes.sorted.txt
 sort functional_annotation.txt > functional_annotation.sorted.txt
 
@@ -74,27 +74,24 @@ sort -k1,1 functional_annotation.txt > functional_annotation.sorted.txt
 join -t $'\t' Resistance_MODERATE_genes.sorted.txt functional_annotation.sorted.txt \
     > Resistance_MODERATE_genes_with_annotation.txt
 
-
 join Resistance_MODERATE_genes.sorted.txt functional_annotation.sorted.txt \
     > Resistance_MODERATE_genes_with_annotation.txt
 
 
 #For_Susceptible
 
-bcftools view -i 'INFO/ANN ~ "HIGH"' Resistance.annotated.vcf.gz \
-    -Oz -o Resistance.HIGH.vcf.gz
-bcftools index Resistance.HIGH.vcf.gz
-    
+bcftools view -i 'INFO/ANN ~ "HIGH"' Susceptible.annotated.vcf.gz \
+    -Oz -o Susceptible.HIGH.vcf.gz
+ bcftools index Susceptible.HIGH.vcf.gz
+ gunzip -c Susceptible.HIGH.vcf.gz > Susceptible.HIGH.vcf
+ 
     bcftools view -i 'INFO/ANN ~ "HIGH|MODERATE"' Susceptible.annotated.vcf.gz \
   -Oz -o Susceptible.HIGH.vcf.gz
   bcftools index Susceptible.HIGH.vcf.gz
 
-  
-zcat Resistance.HIGH.vcf.gz | head
- zmore Resistance.HIGH.vcf.gz
-
-
 zcat Susceptible.HIGH.vcf.gz | head
+zmore Susceptible.HIGH.vcf.gz
+
 zgrep -v "^#" Susceptible.HIGH.vcf.gz | head
 bcftools view -H Susceptible.HIGH.vcf.gz | wc -l
 
@@ -105,13 +102,11 @@ bcftools index Susceptible.MODERATE.vcf.gz
 bcftools view -H Susceptible.MODERATE.vcf.gz | wc -l
 zgrep -v "^#" Susceptible.MODERATE.vcf.gz | head
 
-
-
 bcftools view -i 'INFO/ANN ~ "HIGH"' Susceptible.annotated.vcf.gz \
     -Oz -o Susceptible.HIGH.vcf.gz
 
 
-    #Extracted_geneID_from_moderate_variants
+#Extracted_geneID_from_moderate_variants
     zgrep -v "^#" Susceptible.MODERATE.vcf.gz \
     | sed 's/.*ANN=//' \
     | tr ',' '\n' \
@@ -145,7 +140,7 @@ sort -k1,1 bed_gene_locations.tsv > bed_gene_locations.sorted.tsv
 sort -k1,1 Susceptible_MODERATE_genes_with_annotation.txt > S_mod.sorted.txt
 sort -k1,1 Resistance_MODERATE_genes_with_annotation.txt > R_mod.sorted.txt
 
-#JOIN susceptible list with BED genomic locations
+#JOIN_susceptible_list_with_BED_genomic_locations
 join -t $'\t' -1 1 -2 1 S_mod.sorted.txt bed_gene_locations.sorted.tsv \
     > Susceptible_MODERATE_genes_with_locations.tsv
 
@@ -164,17 +159,8 @@ tr '\t' ',' < Resistance_MODERATE_genes_with_locations.tsv \
 
 zmore Resistance.annotated.vcf.gz
 
-
-
-
-
-
-
 zgrep -w "HIGH" Susceptible.annotated.vcf.gz
 zgrep -w "MODERATE" Susceptible.annotated.vcf.gz
-
-
-
 
 
 #SEQUENCE_EXTRACTION_from_CSV_FILE
@@ -202,8 +188,6 @@ conda install -c bioconda bedtools
 awk -F',' 'BEGIN{OFS="\t"} {print $3, $4-1, $5, $1}' \
 /home/g89x126/sc_wgs/snpeff/Resistance_MODERATE_genes_with_locations.csv \
 > Resistance_MODERATE_genes.bed
-
-
 
 bedtools getfasta \
     -fi sequences.fa \
@@ -254,7 +238,6 @@ awk -F',' 'BEGIN{OFS="\t"} {
     if (chrom ~ /^M6_v4/) print chrom, start, end, gene
 }' Susceptible_MODERATE_genes_with_locations.csv \
 > Susceptible_MODERATE_genes.bed
-
 
 
 mv Susceptible_MODERATE_genes.bed /home/g89x126/sc_wgs/snpeff/data/solanum_chacoense_m6/
